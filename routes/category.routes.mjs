@@ -18,28 +18,30 @@ const router = express.Router(); // создали роутер
 
 // router.post("/signin", upload.single("file"), validateUpload, login);
 
-router.post("/category", categoryController.createCategory);
+router.post(
+  "/category",
+  celebrate({
+    [Segments.BODY]: Joi.object().keys({
+      id: Joi.number().required(),
+      name: Joi.string().required(),
+      code: Joi.number().required(),
+    }),
+  }),
+  categoryController.createCategory
+);
 router.get("/category", categoryController.getCategory);
-router.get("/category:id", categoryController.getOneCategory);
+router.get("/category/:id", categoryController.getOneCategory);
 router.put(
   "/category",
   celebrate({
     [Segments.BODY]: Joi.object().keys({
-      email: Joi.string().email().required(),
-      password: Joi.string().min(8).required(),
+      id: Joi.number().required(),
+      name: Joi.string().required(),
+      code: Joi.number().required(),
     }),
   }),
   categoryController.updateCategory
 );
-router.delete(
-  "/category:id",
-  celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      email: Joi.string().email().required(),
-      password: Joi.string().min(8).required(),
-    }),
-  }),
-  categoryController.deleteCategory
-);
+router.delete("/category/:id", categoryController.deleteCategory);
 
 export default router;
