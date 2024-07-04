@@ -1,6 +1,5 @@
 // загружает файл .env в Node.js
 import { config } from "dotenv";
-
 import express from "express";
 import bodyParser from "body-parser";
 import { fileURLToPath } from "url";
@@ -10,13 +9,14 @@ import { errors } from "celebrate";
 import NotFoundError from "../errors/not-found-error.mjs";
 import cors from "../middlewares/cors.mjs";
 import { requestLogger, errorLogger } from "../middlewares/logger.mjs";
+import { routerCategory } from "../routes/index.mjs";
 
 config();
 
 // подключаем environment переменные
 const { NODE_ENV, JWT_SECRET, DB_ROUTE } = process.env;
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3030 } = process.env;
 
 let total = 0;
 
@@ -53,6 +53,8 @@ app.use(cors); // обработка кросс-доменных запросо�
 
 //   // res.send("The sedulous hyena ate the antelope!");
 // });
+
+app.use(routerCategory);
 
 app.get("/", (req, res) => {
   total += 1;
