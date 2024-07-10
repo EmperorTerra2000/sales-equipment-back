@@ -1,6 +1,6 @@
 import db from "../src/db.mjs";
 
-class categoryController {
+class CategoryController {
   async createCategory(req, res) {
     const { name, code } = req.body;
 
@@ -42,4 +42,4 @@ class categoryController {
   }
 }
 
-export default new categoryController();
+export default new CategoryController();
