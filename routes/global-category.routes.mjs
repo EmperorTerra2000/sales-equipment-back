@@ -1,6 +1,6 @@
 import express from "express";
 import { Joi, celebrate, Segments } from "celebrate";
-//import multer from "multer";
+import multer from "multer";
 import globalCategoryController from "../controllers/global-category.controller.mjs";
 
 const router = express.Router(); // создали роутер

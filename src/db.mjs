@@ -6,7 +6,7 @@ const db = new Pool({
   password: "root",
   host: "localhost",
   port: 5432,
-  database: "products",
+  database: "sales_equipment",
 });
 
 export default db;

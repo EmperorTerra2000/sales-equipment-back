@@ -1,9 +1,12 @@
 import express from "express";
 import { Joi, celebrate, Segments } from "celebrate";
-//import multer from "multer";
+import multer from "multer";
 import categoryController from "../controllers/category.controller.mjs";
 
 const router = express.Router(); // создали роутер
+const upload = multer({
+  dest: "uploads/",
+});
 
 //const upload = multer({ dest: "uploads/" }); // Указываем папку для временного хранения файлов
 
@@ -20,13 +23,7 @@ const router = express.Router(); // создали роутер
 
 router.post(
   "/category",
-  celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      id: Joi.number().required(),
-      name: Joi.string().required(),
-      code: Joi.number().required(),
-    }),
-  }),
+  upload.single("image"),
   categoryController.createCategory
 );
 router.get("/category", categoryController.getCategory);
