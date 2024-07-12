@@ -1,16 +1,40 @@
 import db from "../src/db.mjs";
+import * as path from "path";
+import * as fs from "fs";
+import { fileURLToPath } from "url";
+import sharp from "sharp";
+
+import { formatDate } from "../utils/helpers/formatter.helpers.mjs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const __rootPath = path.resolve(__dirname, "..");
 
 class GlobalCategoryController {
   async create(req, res) {
-    const { name, code } = req.body;
+    try {
+      const { name } = req.body;
+      const { path: tempPath, originalname, filename } = req.file;
 
-    const newData = await db.query(
-      `INSERT INTO global_category (code, name) values ($1, $2) RETURNING *`,
-      [code, name]
-    );
-    console.log(req.body);
+      const targetPath = path.join(
+        __rootPath,
+        `uploads/global_category/${originalname}`
+      );
 
-    res.json(newData.rows[0]);
+      const targetPathDeleteFile = path.join(__rootPath, `uploads/${filename}`);
+
+      await sharp(tempPath).toFile(targetPath);
+      fs.unlinkSync(targetPathDeleteFile);
+
+      const newData = await db.query(
+        `INSERT INTO global_category (name, created_at, image) values ($1, $2, $3) RETURNING *`,
+        [name, formatDate(new Date()), originalname]
+      );
+
+      res.json(newData.rows[0]);
+    } catch (err) {
+      console.error(err);
+    }
   }
   async get(req, res) {
     const data = await db.query("SELECT * FROM global_category");

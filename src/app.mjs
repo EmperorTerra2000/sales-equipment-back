@@ -9,7 +9,7 @@ import { errors } from "celebrate";
 import NotFoundError from "../errors/not-found-error.mjs";
 import cors from "../middlewares/cors.mjs";
 import { requestLogger, errorLogger } from "../middlewares/logger.mjs";
-import { routerCategory } from "../routes/index.mjs";
+import { routerCategory, routerGlobalCategory } from "../routes/index.mjs";
 
 config();
 
@@ -54,7 +54,8 @@ app.use(cors); // обработка кросс-доменных запросо�
 //   // res.send("The sedulous hyena ate the antelope!");
 // });
 
-app.use(routerCategory);
+app.use("/api/v1/", routerCategory);
+app.use("/api/v1/", routerGlobalCategory);
 
 app.get("/", (req, res) => {
   total += 1;

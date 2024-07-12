@@ -4,6 +4,9 @@ import multer from "multer";
 import globalCategoryController from "../controllers/global-category.controller.mjs";
 
 const router = express.Router(); // создали роутер
+const upload = multer({
+  dest: "uploads/",
+});
 
 //const upload = multer({ dest: "uploads/" }); // Указываем папку для временного хранения файлов
 
@@ -20,11 +23,10 @@ const router = express.Router(); // создали роутер
 
 router.post(
   "/global-category",
+  upload.single("image"),
   celebrate({
     [Segments.BODY]: Joi.object().keys({
-      id: Joi.number().required(),
       name: Joi.string().required(),
-      code: Joi.number().required(),
     }),
   }),
   globalCategoryController.create
