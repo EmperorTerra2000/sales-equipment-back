@@ -1,12 +1,21 @@
 import express from "express";
 import { Joi, celebrate, Segments } from "celebrate";
 import multer from "multer";
+import * as path from "path";
 import globalCategoryController from "../controllers/global-category.controller.mjs";
 
 const router = express.Router(); // создали роутер
-const upload = multer({
-  dest: "uploads/",
+// Настройка multer для хранения загруженных файлов
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Генерируем уникальное имя файла
+  },
 });
+
+const upload = multer({ storage: storage });
 
 //const upload = multer({ dest: "uploads/" }); // Указываем папку для временного хранения файлов
 

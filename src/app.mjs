@@ -18,8 +18,6 @@ const { NODE_ENV, JWT_SECRET, DB_ROUTE } = process.env;
 
 const { PORT = 3030 } = process.env;
 
-let total = 0;
-
 const app = express();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +32,7 @@ app.use(cookieParser(NODE_ENV === "production" ? JWT_SECRET : "dev-secret"));
 // Логгер запросов нужно подключить до всех обработчиков роутов
 app.use(requestLogger); // подключаем логгер запросов
 
+console.log("in APP");
 app.use(cors); // обработка кросс-доменных запросов
 
 // app.get("/", (req, res) => {
@@ -58,10 +57,6 @@ app.use("/api/v1/", routerCategory);
 app.use("/api/v1/", routerGlobalCategory);
 
 app.get("/", (req, res) => {
-  total += 1;
-
-  console.log(total);
-
   res.send("<h1>HOOOOME</h1>");
 });
 

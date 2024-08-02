@@ -23,6 +23,7 @@
     "nanoid": "^5.0.7",
     "pg": "^8.12.0",
     "sharp": "^0.33.4",
+    "transliteration": "^2.3.5",
     "validator": "^13.11.0",
     "winston": "^3.13.0"
   },
