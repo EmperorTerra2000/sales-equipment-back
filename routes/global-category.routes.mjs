@@ -42,17 +42,11 @@ router.post(
 );
 router.get("/global-category", globalCategoryController.get);
 router.get("/global-category/:id", globalCategoryController.getOne);
-router.put(
-  "/global-category",
-  celebrate({
-    [Segments.BODY]: Joi.object().keys({
-      id: Joi.number().required(),
-      name: Joi.string().required(),
-      code: Joi.number().required(),
-    }),
-  }),
-  globalCategoryController.update
+router.get(
+  "/global-category/name_en/:name",
+  globalCategoryController.getOneName
 );
+router.patch("/global-category/:id", globalCategoryController.update);
 router.delete("/global-category/:id", globalCategoryController.delete);
 
 export default router;

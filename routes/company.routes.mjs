@@ -2,7 +2,7 @@ import express from "express";
 import { Joi, celebrate, Segments } from "celebrate";
 import multer from "multer";
 import * as path from "path";
-import categoryController from "../controllers/category.controller.mjs";
+import companyController from "../controllers/company.controller.mjs";
 
 const router = express.Router(); // создали роутер
 const storage = multer.diskStorage({
@@ -16,13 +16,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/category", upload.single("image"), categoryController.create);
-router.get("/category", categoryController.get);
-router.get("/category/:id", categoryController.getOne);
-router.get("/category/name_en/:name", categoryController.getOneName);
-router.get("/category/global-id/:id", categoryController.getGlobalId);
+router.post("/company", upload.single("image"), companyController.create);
+router.get("/company", companyController.get);
+router.get("/company/category/:id", companyController.getCategoryId);
+router.get("/company/:id", companyController.getOne);
 router.put(
-  "/category",
+  "/company",
   celebrate({
     [Segments.BODY]: Joi.object().keys({
       id: Joi.number().required(),
@@ -30,8 +29,8 @@ router.put(
       code: Joi.number().required(),
     }),
   }),
-  categoryController.update
+  companyController.update
 );
-router.delete("/category/:id", categoryController.delete);
+router.delete("/company/:id", companyController.delete);
 
 export default router;

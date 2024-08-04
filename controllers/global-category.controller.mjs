@@ -1,10 +1,12 @@
 import db from "../src/db.mjs";
 import * as path from "path";
-import { transliterate } from "transliteration";
 import { fileURLToPath } from "url";
 import sharp from "sharp";
 
-import { formatDate } from "../utils/helpers/formatter.helpers.mjs";
+import {
+  formatDate,
+  transliterate,
+} from "../utils/helpers/formatter.helpers.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +38,7 @@ class GlobalCategoryController {
       //   });
       // }
 
-      const latinText = transliterate(name).toLowerCase().trim();
+      const latinText = transliterate(name.trim());
 
       const newData = await db.query(
         `INSERT INTO global_category (name, created_at, image, name_en) values ($1, $2, $3, $4) RETURNING *`,
@@ -96,23 +98,72 @@ class GlobalCategoryController {
         return res.status(404).json({ error: "Category not found" });
       }
 
-      console.log(data.rows);
+      // Отправка данных в ответе
+      res.json({
+        data: data.rows[0],
+        meta: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error.message);
+    }
+  }
+  async getOneName(req, res) {
+    try {
+      const name = req.params.name;
+
+      // Проверка наличия параметра `id`
+      if (!name) {
+        return res.status(400).json({ error: "name is required" });
+      }
+
+      // Выполнение запроса к базе данных
+      const data = await db.query(
+        "SELECT * FROM global_category WHERE name_en = $1",
+        [name]
+      );
+
+      // Проверка наличия данных
+      if (data.rows.length === 0) {
+        return res.status(404).json({ error: "Category not found" });
+      }
 
       // Отправка данных в ответе
-      res.json(data.rows[0]);
+      res.json({
+        data: data.rows[0],
+        meta: {},
+      });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
+      console.log(error);
+      return res.status(500).json(error.message);
     }
   }
   async update(req, res) {
-    const { name, code, id } = req.body;
-    const data = await db.query(
-      "UPDATE global_category set name = $1, code = $2 where id = $3 RETURNING *",
-      [name, code, id]
-    );
+    const { id } = req.params;
+    const updates = req.body;
 
-    res.json(data.rows[0]);
+    if (updates.name) {
+      updates.name_en = transliterate(updates.name.trim());
+    }
+
+    // Создание SQL-запроса для обновления данных
+    const updateQuery = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(", ");
+
+    const values = Object.values(updates);
+    values.push(id);
+
+    const query = `UPDATE global_category SET ${updateQuery} WHERE id = $${values.length}`;
+    console.log(query);
+
+    try {
+      const data = await db.query(query, values);
+      res.status(200).send({ message: "Item updated successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ error: "Failed to update item" });
+    }
   }
   async delete(req, res) {
     const id = req.params.id;
