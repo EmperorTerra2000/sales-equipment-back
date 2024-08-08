@@ -13,6 +13,7 @@ import {
   routerCategory,
   routerGlobalCategory,
   routerCompany,
+  routerProduct,
 } from "../routes/index.mjs";
 
 config();
@@ -60,6 +61,7 @@ app.use(cors); // обработка кросс-доменных запросо�
 app.use("/api/v1/", routerCategory);
 app.use("/api/v1/", routerGlobalCategory);
 app.use("/api/v1/", routerCompany);
+app.use("/api/v1/", routerProduct);
 
 app.get("/", (req, res) => {
   res.send("<h1>HOOOOME</h1>");

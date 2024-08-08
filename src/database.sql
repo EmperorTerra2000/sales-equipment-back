@@ -21,6 +21,18 @@ CREATE TABLE companies (
     categories INTEGER[]
 );
 
+CREATE TABLE products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	image VARCHAR(255),
+	name_en VARCHAR(255) NOT NULL,
+    description TEXT,
+	specifications JSONB,
+    companies_id INT,
+	FOREIGN KEY (companies_id) REFERENCES companies(id)
+);
+
 -- Поиск по элементу массива (например элемент = 5)
 
 -- 1 способ

@@ -1,30 +1,42 @@
 import sharp from "sharp";
-import { transliterate } from "transliteration";
 import * as path from "path";
 import db from "../src/db.mjs";
-import { formatDate } from "../utils/helpers/formatter.helpers.mjs";
+import {
+  formatDate,
+  transliterate,
+} from "../utils/helpers/formatter.helpers.mjs";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const __rootPath = path.resolve(__dirname, "..");
 
-class CompanyController {
+class ProductController {
   async create(req, res) {
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
     }
 
     try {
-      const { name, categories } = req.body;
-      const { path: tempPath, originalname, filename } = req.file;
+      const { name, companyId, description, specifications } = req.body;
+      const { path: tempPath, filename } = req.file;
 
-      const targetPath = path.join(__rootPath, `uploads/companies/${filename}`);
+      console.log(specifications);
+
+      const targetPath = path.join(__rootPath, `uploads/products/${filename}`);
       await sharp(tempPath).toFile(targetPath);
-      const latinText = transliterate(name).toLowerCase().trim();
+      const latinText = transliterate(name.trim());
       const newData = await db.query(
-        `INSERT INTO companies (name, created_at, image, name_en, categories) values ($1, $2, $3, $4, $5) RETURNING *`,
-        [name.trim(), formatDate(new Date()), filename, latinText, categories]
+        `INSERT INTO products (name, created_at, image, name_en, description, companies_id, specifications) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [
+          name.trim(),
+          formatDate(new Date()),
+          filename,
+          latinText,
+          description,
+          companyId,
+          !specifications ? null : JSON.stringify(specifications),
+        ]
       );
 
       res.json(newData.rows[0]);
@@ -40,7 +52,7 @@ class CompanyController {
   async get(req, res) {
     try {
       // Выполнение запроса к базе данных
-      const data = await db.query("SELECT * FROM companies");
+      const data = await db.query("SELECT * FROM products");
 
       // Проверка наличия данных
       if (data.rows.length === 0) {
@@ -49,7 +61,7 @@ class CompanyController {
 
       data.rows = data.rows.map((item) => ({
         ...item,
-        image: `http://127.0.0.1/uploads/companies/${item.image}`,
+        image: `http://127.0.0.1/uploads/products/${item.image}`,
       }));
 
       // Отправка данных в ответе
@@ -62,7 +74,6 @@ class CompanyController {
   }
   async getOneName(req, res) {
     try {
-      console.log(req.params);
       const name = req.params.name;
 
       // Проверка наличия параметра
@@ -71,10 +82,9 @@ class CompanyController {
       }
 
       // Выполнение запроса к базе данных
-      const data = await db.query(
-        "SELECT * FROM companies WHERE name_en = $1",
-        [name]
-      );
+      const data = await db.query("SELECT * FROM products WHERE name_en = $1", [
+        name,
+      ]);
 
       // Проверка наличия данных
       if (data.rows.length === 0) {
@@ -88,11 +98,11 @@ class CompanyController {
       return res.status(500).json(error.message);
     }
   }
-  async getCategoryId(req, res) {
+  async getCompanyId(req, res) {
     try {
       const id = req.params.id;
       const data = await db.query(
-        "SELECT * FROM companies where $1 = ANY(categories)",
+        "SELECT * FROM products where companies_id = $1",
         [id]
       );
 
@@ -103,7 +113,7 @@ class CompanyController {
 
       data.rows = data.rows.map((item) => ({
         ...item,
-        image: `http://127.0.0.1/uploads/companies/${item.image}`,
+        image: `http://127.0.0.1/uploads/category/${item.image}`,
       }));
 
       // Отправка данных в ответе
@@ -139,4 +149,4 @@ class CompanyController {
   }
 }
 
-export default new CompanyController();
+export default new ProductController();
