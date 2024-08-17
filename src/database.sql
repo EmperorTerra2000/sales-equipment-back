@@ -45,11 +45,10 @@ WHERE my_array @> ARRAY[5];
 
 DROP TABLE table_name;
 
+SELECT p.*, c.name_en FROM products AS p JOIN companies AS c ON p.companies_id = c.id where companies_id = 1;
 
 
-
-
-
+select cat.*, gl.name gl_name, gl.name_en gl_name_en from category AS cat JOIN global_category AS gl ON cat.global_category_id = gl.id WHERE gl.name_en = 'trof-2';
 
 
 В Next.js можно использовать транслитерацию для создания SEO-дружественных URL с русскими словами. Для этого можно воспользоваться библиотекой `transliteration`, которая предоставляет удобные функции для транслитерации текста.

@@ -91,6 +91,11 @@ class ProductController {
         return res.status(404).json({ error: "Category not found" });
       }
 
+      data.rows = data.rows.map((item) => ({
+        ...item,
+        image: `http://127.0.0.1/uploads/products/${item.image}`,
+      }));
+
       // Отправка данных в ответе
       res.json(data.rows[0]);
     } catch (error) {
@@ -106,6 +111,15 @@ class ProductController {
         [id]
       );
 
+      const dataCompany = await db.query(
+        "SELECT * FROM companies where id = $1",
+        [id]
+      );
+
+      // Проверка наличия данных
+      if (dataCompany.rows.length === 0) {
+        return res.status(404).json({ error: "No categories found" });
+      }
       // Проверка наличия данных
       if (data.rows.length === 0) {
         return res.status(404).json({ error: "No categories found" });
@@ -113,11 +127,17 @@ class ProductController {
 
       data.rows = data.rows.map((item) => ({
         ...item,
-        image: `http://127.0.0.1/uploads/category/${item.image}`,
+        image: `http://127.0.0.1/uploads/products/${item.image}`,
       }));
 
       // Отправка данных в ответе
-      res.json(data.rows);
+      res.json({
+        company: {
+          name: dataCompany.rows[0].name,
+          name_en: dataCompany.rows[0].name_en,
+        },
+        data: data.rows,
+      });
     } catch (error) {
       // Обработка ошибок
       console.error("Error fetching categories:", error);
