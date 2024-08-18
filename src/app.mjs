@@ -19,9 +19,9 @@ import {
 config();
 
 // подключаем environment переменные
-const { NODE_ENV, JWT_SECRET, DB_ROUTE } = process.env;
+const { NODE_ENV, JWT_SECRET } = process.env;
 
-const { PORT = 3030 } = process.env;
+const PORT = NODE_ENV === "production" ? process.env?.PORT ?? 3030 : 3030;
 
 const app = express();
 
