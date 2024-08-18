@@ -22,6 +22,7 @@ config();
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const PORT = NODE_ENV === "production" ? process.env?.PORT ?? 3030 : 3030;
+export const URL_HOST = process.env?.URL_HOST;
 
 const app = express();
 

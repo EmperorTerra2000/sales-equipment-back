@@ -7,6 +7,7 @@ import {
   formatDate,
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
+import { URL_HOST } from "../src/app.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -67,7 +68,7 @@ class GlobalCategoryController {
 
       data.rows = data.rows.map((item) => ({
         ...item,
-        image: `http://127.0.0.1/uploads/global_category/${item.image}`,
+        image: `${URL_HOST}/uploads/global_category/${item.image}`,
       }));
 
       // Отправка данных в ответе

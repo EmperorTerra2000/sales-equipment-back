@@ -4,6 +4,7 @@ import * as path from "path";
 import db from "../src/db.mjs";
 import { formatDate } from "../utils/helpers/formatter.helpers.mjs";
 import { fileURLToPath } from "url";
+import { URL_HOST } from "../src/app.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,7 +50,7 @@ class CategoryController {
 
       data.rows = data.rows.map((item) => ({
         ...item,
-        image: `http://127.0.0.1/uploads/category/${item.image}`,
+        image: `${URL_HOST}/uploads/category/${item.image}`,
       }));
 
       // Отправка данных в ответе
@@ -104,7 +105,7 @@ class CategoryController {
 
       data.rows = data.rows.map((item) => ({
         ...item,
-        image: `http://127.0.0.1/uploads/category/${item.image}`,
+        image: `${URL_HOST}/uploads/category/${item.image}`,
       }));
 
       // Отправка данных в ответе
