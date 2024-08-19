@@ -7,6 +7,7 @@ import {
 } from "../utils/helpers/formatter.helpers.mjs";
 import { fileURLToPath } from "url";
 import { URL_HOST } from "../src/app.mjs";
+import { deleteFile } from "../utils/helpers/action.helpers.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,10 +23,9 @@ class ProductController {
       const { name, companyId, description, specifications } = req.body;
       const { path: tempPath, filename } = req.file;
 
-      console.log(specifications);
-
       const targetPath = path.join(__rootPath, `uploads/products/${filename}`);
       await sharp(tempPath).toFile(targetPath);
+      await deleteFile(tempPath);
       const latinText = transliterate(name.trim());
       const newData = await db.query(
         `INSERT INTO products (name, created_at, image, name_en, description, companies_id, specifications) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,

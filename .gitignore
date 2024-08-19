@@ -28,6 +28,7 @@
 *.bmp
 *.tiff
 *.webp
+*.avif
 
 *.log
 npm-debug.log*

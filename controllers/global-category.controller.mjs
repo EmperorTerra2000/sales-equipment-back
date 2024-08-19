@@ -8,6 +8,7 @@ import {
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
 import { URL_HOST } from "../src/app.mjs";
+import { deleteFile } from "../utils/helpers/action.helpers.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,6 +32,7 @@ class GlobalCategoryController {
       // const targetPathDeleteFile = path.join(__rootPath, `uploads/${filename}`);
 
       await sharp(tempPath).toFile(targetPath);
+      await deleteFile(tempPath);
 
       // if (fs.existsSync(tempPath)) {
       //   await fs.unlink(tempPath, (err) => {

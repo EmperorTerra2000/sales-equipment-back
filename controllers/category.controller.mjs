@@ -1,8 +1,11 @@
 import sharp from "sharp";
-import { transliterate } from "transliteration";
 import * as path from "path";
 import db from "../src/db.mjs";
-import { formatDate } from "../utils/helpers/formatter.helpers.mjs";
+import {
+  formatDate,
+  transliterate,
+} from "../utils/helpers/formatter.helpers.mjs";
+import { deleteFile } from "../utils/helpers/action.helpers.mjs";
 import { fileURLToPath } from "url";
 import { URL_HOST } from "../src/app.mjs";
 
@@ -22,7 +25,9 @@ class CategoryController {
 
       const targetPath = path.join(__rootPath, `uploads/category/${filename}`);
       await sharp(tempPath).toFile(targetPath);
-      const latinText = transliterate(name).toLowerCase().trim();
+      await deleteFile(tempPath);
+
+      const latinText = transliterate(name.trim());
       const newData = await db.query(
         `INSERT INTO category (name, created_at, image, name_en, global_category_id) values ($1, $2, $3, $4, $5) RETURNING *`,
         [name.trim(), formatDate(new Date()), filename, latinText, globalCatId]
