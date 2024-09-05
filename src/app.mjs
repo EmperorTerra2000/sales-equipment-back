@@ -14,6 +14,7 @@ import {
   routerGlobalCategory,
   routerCompany,
   routerProduct,
+  routerSendRequest,
 } from "../routes/index.mjs";
 
 config();
@@ -36,9 +37,7 @@ app.use(bodyParser.urlencoded({ extended: true })); // для приема ст�
 app.use(cookieParser(NODE_ENV === "production" ? JWT_SECRET : "dev-secret"));
 
 // Логгер запросов нужно подключить до всех обработчиков роутов
-app.use(requestLogger); // подключаем логгер запросов
-
-console.log("in APP");
+app.use(requestLogger); // подключаем логгер запросов\
 app.use(cors); // обработка кросс-доменных запросов
 
 // app.get("/", (req, res) => {
@@ -63,6 +62,7 @@ app.use("/api/v1/", routerCategory);
 app.use("/api/v1/", routerGlobalCategory);
 app.use("/api/v1/", routerCompany);
 app.use("/api/v1/", routerProduct);
+app.use("/api/v1/", routerSendRequest);
 
 app.get("/", (req, res) => {
   res.send("<h1>HOOOOME</h1>");
