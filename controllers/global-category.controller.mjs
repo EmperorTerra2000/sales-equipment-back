@@ -19,7 +19,7 @@ class GlobalCategoryController {
       const { name } = req.body;
       const dataImage = {};
 
-      downloadFile(req, dataImage, "global_category");
+      await downloadFile(req, dataImage, "global_category");
 
       const latinText = transliterate(name.trim());
 
@@ -133,7 +133,7 @@ class GlobalCategoryController {
       updates.name_en = transliterate(updates.name.trim());
     }
 
-    downloadFile(req, updates, "global_category");
+    await downloadFile(req, updates, "global_category");
 
     // Создание SQL-запроса для обновления данных
     const updateQuery = Object.keys(updates)

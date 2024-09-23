@@ -18,7 +18,7 @@ class CategoryController {
       const { name, globalCatId } = req.body;
       const dataImage = {};
 
-      downloadFile(req, dataImage, "category");
+      await downloadFile(req, dataImage, "category");
 
       const latinText = transliterate(name.trim());
       const newData = await db.query(
@@ -142,8 +142,7 @@ class CategoryController {
       updates.name_en = transliterate(updates.name.trim());
     }
 
-    downloadFile(req, updates, "category");
-    console.log(updates);
+    await downloadFile(req, updates, "category");
 
     // Создание SQL-запроса для обновления данных
     const updateQuery = Object.keys(updates)
@@ -152,8 +151,6 @@ class CategoryController {
 
     const values = Object.values(updates);
     values.push(id);
-
-    console.log(values);
 
     const query = `UPDATE ${this.#NAME_TABLE} SET ${updateQuery} WHERE id = $${
       values.length
