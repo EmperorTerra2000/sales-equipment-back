@@ -143,6 +143,7 @@ class CategoryController {
     }
 
     downloadFile(req, updates, "category");
+    console.log(updates);
 
     // Создание SQL-запроса для обновления данных
     const updateQuery = Object.keys(updates)
@@ -151,6 +152,8 @@ class CategoryController {
 
     const values = Object.values(updates);
     values.push(id);
+
+    console.log(values);
 
     const query = `UPDATE ${this.#NAME_TABLE} SET ${updateQuery} WHERE id = $${
       values.length
