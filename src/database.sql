@@ -51,6 +51,34 @@ SELECT p.*, c.name_en FROM products AS p JOIN companies AS c ON p.companies_id =
 select cat.*, gl.name gl_name, gl.name_en gl_name_en from category AS cat JOIN global_category AS gl ON cat.global_category_id = gl.id WHERE gl.name_en = 'trof-2';
 
 
+-- как в postgre sql сделать столбец который будет проверять на пустоту другой связанной таблицы
+-- создаем две таблицы
+CREATE TABLE main_table (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255)
+);
+
+CREATE TABLE related_table (
+    id SERIAL PRIMARY KEY,
+    main_table_id INT REFERENCES main_table(id)
+);
+
+-- Теперь создадим представление, которое будет содержать столбец is_related_table_empty
+CREATE VIEW main_table_with_related_status AS
+SELECT
+    mt.id,
+    mt.name,
+    CASE
+        WHEN EXISTS (SELECT 1 FROM related_table rt WHERE rt.main_table_id = mt.id) THEN FALSE
+        ELSE TRUE
+    END AS is_related_table_empty
+FROM
+    main_table mt;
+
+-- Теперь вы можете запросить это представление, чтобы увидеть, пуста ли related_table для каждой записи в main_table
+SELECT * FROM main_table_with_related_status;
+
+
 В Next.js можно использовать транслитерацию для создания SEO-дружественных URL с русскими словами. Для этого можно воспользоваться библиотекой `transliteration`, которая предоставляет удобные функции для транслитерации текста.
 
 Вот пример, как можно использовать транслитерацию в Next.js:

@@ -46,7 +46,15 @@ router.get(
   "/global-category/name_en/:name",
   globalCategoryController.getOneName
 );
-router.patch("/global-category/:id", globalCategoryController.update);
+router.patch(
+  "/global-category/:id",
+  upload.single("image"),
+  globalCategoryController.update
+);
 router.delete("/global-category/:id", globalCategoryController.delete);
+router.patch(
+  "/global-category/activity/:id",
+  globalCategoryController.activity
+);
 
 export default router;

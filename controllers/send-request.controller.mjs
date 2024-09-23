@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 
 class SendRequestController {
   async send(req, res) {
+    const { NODEMAILER_USER, NODEMAILER_PASS, LIST_EMAIL } = process.env;
     const {
       manufactured,
       inn,
@@ -19,14 +20,14 @@ class SendRequestController {
         port: 2525,
         secure: false,
         auth: {
-          user: "abramov_trofim@mail.ru",
-          pass: "tDGGzPC7UEfX",
+          user: NODEMAILER_USER,
+          pass: NODEMAILER_PASS,
         },
       });
       // отправка самого письма
       await transporter.sendMail({
         from: `"ENGINEERING INTELLIGENCE TEAM" <info@idlepshokoff.com>`,
-        to: "abramov_trofim@mail.ru, troha1994@gmail.com, partsales796@gmail.com",
+        to: LIST_EMAIL,
         subject: "Заказ",
         text: `${req.body}`,
         html: `
@@ -43,6 +44,8 @@ class SendRequestController {
 
       res.status(200).json("successful");
     } catch (err) {
+      console.error(err);
+
       res.status(500).json({
         message: err.message,
       });

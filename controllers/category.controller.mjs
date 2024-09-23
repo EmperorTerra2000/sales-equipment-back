@@ -1,36 +1,37 @@
-import sharp from "sharp";
-import * as path from "path";
 import db from "../src/db.mjs";
 import {
   formatDate,
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
-import { deleteFile } from "../utils/helpers/action.helpers.mjs";
-import { fileURLToPath } from "url";
+import { downloadFile } from "../utils/helpers/action.helpers.mjs";
 import { URL_HOST } from "../src/app.mjs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const __rootPath = path.resolve(__dirname, "..");
-
 class CategoryController {
-  async create(req, res) {
+  #NAME_TABLE = "category";
+
+  create = async (req, res) => {
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
     }
 
     try {
       const { name, globalCatId } = req.body;
-      const { path: tempPath, originalname, filename } = req.file;
+      const dataImage = {};
 
-      const targetPath = path.join(__rootPath, `uploads/category/${filename}`);
-      await sharp(tempPath).toFile(targetPath);
-      await deleteFile(tempPath);
+      downloadFile(req, dataImage, "category");
 
       const latinText = transliterate(name.trim());
       const newData = await db.query(
-        `INSERT INTO category (name, created_at, image, name_en, global_category_id) values ($1, $2, $3, $4, $5) RETURNING *`,
-        [name.trim(), formatDate(new Date()), filename, latinText, globalCatId]
+        `INSERT INTO ${
+          this.#NAME_TABLE
+        } (name, created_at, image, name_en, global_category_id) values ($1, $2, $3, $4, $5) RETURNING *`,
+        [
+          name.trim(),
+          formatDate(new Date()),
+          dataImage.image,
+          latinText,
+          globalCatId,
+        ]
       );
 
       res.json(newData.rows[0]);
@@ -42,11 +43,13 @@ class CategoryController {
       });
       console.error(err);
     }
-  }
-  async get(req, res) {
+  };
+  get = async (req, res) => {
     try {
       // Выполнение запроса к базе данных
-      const data = await db.query("SELECT * FROM category");
+      const data = await db.query(
+        `SELECT * FROM ${this.#NAME_TABLE} WHERE active = true`
+      );
 
       // Проверка наличия данных
       if (data.rows.length === 0) {
@@ -65,8 +68,8 @@ class CategoryController {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
-  async getOneName(req, res) {
+  };
+  getOneName = async (req, res) => {
     try {
       const name = req.params.name;
 
@@ -76,9 +79,10 @@ class CategoryController {
       }
 
       // Выполнение запроса к базе данных
-      const data = await db.query("SELECT * FROM category WHERE name_en = $1", [
-        name,
-      ]);
+      const data = await db.query(
+        `SELECT * FROM ${this.#NAME_TABLE} WHERE name_en = $1`,
+        [name]
+      );
 
       // Проверка наличия данных
       if (data.rows.length === 0) {
@@ -94,12 +98,12 @@ class CategoryController {
       console.log(error);
       return res.status(500).json(error.message);
     }
-  }
-  async getGlobalId(req, res) {
+  };
+  getGlobalId = async (req, res) => {
     try {
       const id = req.params.id;
       const data = await db.query(
-        "SELECT * FROM category where global_category_id = $1",
+        `SELECT * FROM ${this.#NAME_TABLE} where global_category_id = $1`,
         [id]
       );
 
@@ -120,30 +124,75 @@ class CategoryController {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
-  async getOne(req, res) {
+  };
+  getOne = async (req, res) => {
     const id = req.params.id;
-    const category = await db.query("SELECT * FROM category where id = $1", [
-      id,
-    ]);
-
-    res.json(category.rows[0]);
-  }
-  async update(req, res) {
-    const { name, code, id } = req.body;
     const category = await db.query(
-      "UPDATE category set name = $1, code = $2 where id = $3 RETURNING *",
-      [name, code, id]
+      `SELECT * FROM ${this.#NAME_TABLE} where id = $1`,
+      [id]
     );
 
     res.json(category.rows[0]);
-  }
-  async delete(req, res) {
+  };
+  update = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    if (updates.name) {
+      updates.name_en = transliterate(updates.name.trim());
+    }
+
+    downloadFile(req, updates, "category");
+
+    // Создание SQL-запроса для обновления данных
+    const updateQuery = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(", ");
+
+    const values = Object.values(updates);
+    values.push(id);
+
+    const query = `UPDATE ${this.#NAME_TABLE} SET ${updateQuery} WHERE id = $${
+      values.length
+    }`;
+
+    try {
+      const data = await db.query(query, values);
+      res.status(200).send({ message: "Item updated successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ error: "Failed to update item" });
+    }
+  };
+  delete = async (req, res) => {
     const id = req.params.id;
-    const category = await db.query("DELETE FROM category where id = $1", [id]);
+    const category = await db.query(
+      `DELETE FROM ${this.#NAME_TABLE} where id = $1`,
+      [id]
+    );
 
     res.json(category.rows[0]);
-  }
+  };
+  activity = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { activity } = req.body;
+
+      if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+      }
+
+      await db.query(
+        `UPDATE ${this.#NAME_TABLE} SET active = $1 WHERE id = $2`,
+        [activity, id]
+      );
+
+      res.json("success");
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error.message);
+    }
+  };
 }
 
 export default new CategoryController();

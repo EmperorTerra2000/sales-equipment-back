@@ -1,51 +1,33 @@
 import db from "../src/db.mjs";
-import * as path from "path";
-import { fileURLToPath } from "url";
-import sharp from "sharp";
 
 import {
   formatDate,
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
 import { URL_HOST } from "../src/app.mjs";
-import { deleteFile } from "../utils/helpers/action.helpers.mjs";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const __rootPath = path.resolve(__dirname, "..");
+import { downloadFile } from "../utils/helpers/action.helpers.mjs";
 
 class GlobalCategoryController {
-  async create(req, res) {
+  #NAME_TABLE = "global_category";
+
+  create = async (req, res) => {
     if (!req.file) {
       return res.status(400).send("No file uploaded.");
     }
 
     try {
       const { name } = req.body;
-      const { path: tempPath, originalname, filename } = req.file;
+      const dataImage = {};
 
-      const targetPath = path.join(
-        __rootPath,
-        `uploads/global_category/${filename}`
-      );
-
-      // const targetPathDeleteFile = path.join(__rootPath, `uploads/${filename}`);
-
-      await sharp(tempPath).toFile(targetPath);
-      await deleteFile(tempPath);
-
-      // if (fs.existsSync(tempPath)) {
-      //   await fs.unlink(tempPath, (err) => {
-      //     if (err) throw err;
-      //     console.log("path/file.txt was deleted");
-      //   });
-      // }
+      downloadFile(req, dataImage, "global_category");
 
       const latinText = transliterate(name.trim());
 
       const newData = await db.query(
-        `INSERT INTO global_category (name, created_at, image, name_en) values ($1, $2, $3, $4) RETURNING *`,
-        [name.trim(), formatDate(new Date()), filename, latinText]
+        `INSERT INTO ${
+          this.#NAME_TABLE
+        } (name, created_at, image, name_en) values ($1, $2, $3, $4) RETURNING *`,
+        [name.trim(), formatDate(new Date()), dataImage.image, latinText]
       );
 
       res.json(newData.rows[0]);
@@ -57,11 +39,13 @@ class GlobalCategoryController {
       });
       console.error(err);
     }
-  }
-  async get(req, res) {
+  };
+  get = async (req, res) => {
     try {
       // Выполнение запроса к базе данных
-      const data = await db.query("SELECT * FROM global_category");
+      const data = await db.query(
+        `SELECT * FROM ${this.#NAME_TABLE} WHERE active = true`
+      );
 
       // Проверка наличия данных
       if (data.rows.length === 0) {
@@ -80,8 +64,8 @@ class GlobalCategoryController {
       console.error("Error fetching categories:", error);
       res.status(500).json({ error: "Internal Server Error" });
     }
-  }
-  async getOne(req, res) {
+  };
+  getOne = async (req, res) => {
     try {
       const id = req.params.id;
 
@@ -92,7 +76,7 @@ class GlobalCategoryController {
 
       // Выполнение запроса к базе данных
       const data = await db.query(
-        "SELECT * FROM global_category WHERE id = $1",
+        `SELECT * FROM ${this.#NAME_TABLE} WHERE id = $1`,
         [id]
       );
 
@@ -110,8 +94,8 @@ class GlobalCategoryController {
       console.log(error);
       return res.status(500).json(error.message);
     }
-  }
-  async getOneName(req, res) {
+  };
+  getOneName = async (req, res) => {
     try {
       const name = req.params.name;
 
@@ -122,7 +106,7 @@ class GlobalCategoryController {
 
       // Выполнение запроса к базе данных
       const data = await db.query(
-        "SELECT * FROM global_category WHERE name_en = $1",
+        `SELECT * FROM ${this.#NAME_TABLE} WHERE name_en = $1`,
         [name]
       );
 
@@ -140,14 +124,16 @@ class GlobalCategoryController {
       console.log(error);
       return res.status(500).json(error.message);
     }
-  }
-  async update(req, res) {
+  };
+  update = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
     if (updates.name) {
       updates.name_en = transliterate(updates.name.trim());
     }
+
+    downloadFile(req, updates, "global_category");
 
     // Создание SQL-запроса для обновления данных
     const updateQuery = Object.keys(updates)
@@ -157,8 +143,9 @@ class GlobalCategoryController {
     const values = Object.values(updates);
     values.push(id);
 
-    const query = `UPDATE global_category SET ${updateQuery} WHERE id = $${values.length}`;
-    console.log(query);
+    const query = `UPDATE ${this.#NAME_TABLE} SET ${updateQuery} WHERE id = $${
+      values.length
+    }`;
 
     try {
       const data = await db.query(query, values);
@@ -167,15 +154,36 @@ class GlobalCategoryController {
       console.error(err);
       res.status(500).send({ error: "Failed to update item" });
     }
-  }
-  async delete(req, res) {
+  };
+  delete = async (req, res) => {
     const id = req.params.id;
-    const data = await db.query("DELETE FROM global_category where id = $1", [
-      id,
-    ]);
+    const data = await db.query(
+      `DELETE FROM ${this.#NAME_TABLE} where id = $1`,
+      [id]
+    );
 
     res.json(data.rows[0]);
-  }
+  };
+  activity = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const { activity } = req.body;
+
+      if (!id) {
+        return res.status(400).json({ error: "ID is required" });
+      }
+
+      await db.query(
+        `UPDATE ${this.#NAME_TABLE} SET active = $1 WHERE id = $2`,
+        [activity, id]
+      );
+
+      res.json("success");
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json(error.message);
+    }
+  };
 }
 
 export default new GlobalCategoryController();

@@ -33,5 +33,6 @@ router.put(
   companyController.update
 );
 router.delete("/company/:id", companyController.delete);
+router.patch("/company/activity/:id", companyController.activity);
 
 export default router;
