@@ -33,6 +33,7 @@ router.put(
   categoryController.update
 );
 router.delete("/category/:id", categoryController.delete);
+router.patch("/category/:id", categoryController.update);
 router.patch("/category/activity/:id", categoryController.activity);
 
 export default router;
