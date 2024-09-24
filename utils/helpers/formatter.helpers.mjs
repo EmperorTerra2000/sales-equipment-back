@@ -17,3 +17,14 @@ export function transliterate(text) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
+
+export function getNameAndFormatImage(url) {
+  // Разделяем URL на части по символу '/'
+  const parts = url.split("/");
+
+  // Получаем последний элемент массива, который содержит имя файла с расширением
+  const fileNameWithExtension = parts[parts.length - 1];
+
+  // Разделяем имя файла и расширение по символу '.'
+  return fileNameWithExtension.split(".");
+}

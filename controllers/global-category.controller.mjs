@@ -5,7 +5,11 @@ import {
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
 import { URL_HOST } from "../src/app.mjs";
-import { downloadFile } from "../utils/helpers/action.helpers.mjs";
+import {
+  downloadFile,
+  downloadFileHttps,
+  downloadFileV2,
+} from "../utils/helpers/action.helpers.mjs";
 
 class GlobalCategoryController {
   #NAME_TABLE = "global_category";
@@ -31,6 +35,25 @@ class GlobalCategoryController {
       );
 
       res.json(newData.rows[0]);
+    } catch (err) {
+      res.json({
+        error: {
+          message: err.message,
+        },
+      });
+      console.error(err);
+    }
+  };
+  createUrlImage = async (req, res) => {
+    const { image_url } = req.body;
+
+    try {
+      const dataImage = {};
+
+      const filename = await downloadFileHttps(image_url);
+      await downloadFileV2(dataImage, filename, "companies");
+
+      res.send("end");
     } catch (err) {
       res.json({
         error: {

@@ -40,6 +40,10 @@ router.post(
   }),
   globalCategoryController.create
 );
+router.post(
+  "/global-category/url-image",
+  globalCategoryController.createUrlImage
+);
 router.get("/global-category", globalCategoryController.get);
 router.get("/global-category/:id", globalCategoryController.getOne);
 router.get(
