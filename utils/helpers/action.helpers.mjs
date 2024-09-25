@@ -68,7 +68,6 @@ export async function downloadFileHttps(imageUrl) {
           // Обработка события завершения записи
           fileStream.on("finish", () => {
             fileStream.close();
-            console.log("Изображение успешно загружено и сохранено.");
             resolve(nameFile);
           });
         } else {

@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 router.post("/company", upload.single("image"), companyController.create);
+router.post("/company/url-image", companyController.createUrlImage);
 router.get("/company", companyController.get);
 router.get("/company/category/:id", companyController.getCategoryId);
 router.get("/company/name_en/:name", companyController.getOneName);

@@ -7,7 +7,11 @@ import {
 } from "../utils/helpers/formatter.helpers.mjs";
 import { fileURLToPath } from "url";
 import { URL_HOST } from "../src/app.mjs";
-import { deleteFile } from "../utils/helpers/action.helpers.mjs";
+import {
+  deleteFile,
+  downloadFileHttps,
+  downloadFileV2,
+} from "../utils/helpers/action.helpers.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,6 +33,33 @@ class CompanyController {
       await sharp(tempPath).toFile(targetPath);
       await deleteFile(tempPath);
       const latinText = transliterate(name.trim());
+      const newData = await db.query(
+        `INSERT INTO ${
+          this.#NAME_TABLE
+        } (name, created_at, image, name_en, categories) values ($1, $2, $3, $4, $5) RETURNING *`,
+        [name.trim(), formatDate(new Date()), filename, latinText, categories]
+      );
+
+      res.json(newData.rows[0]);
+    } catch (err) {
+      res.json({
+        error: {
+          message: err.message,
+        },
+      });
+      console.error(err);
+    }
+  };
+  createUrlImage = async (req, res) => {
+    try {
+      const { name, image_url, categories } = req.body;
+      const dataImage = {};
+
+      const filename = await downloadFileHttps(image_url);
+      await downloadFileV2(dataImage, filename, "companies");
+
+      const latinText = transliterate(name.trim());
+
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE

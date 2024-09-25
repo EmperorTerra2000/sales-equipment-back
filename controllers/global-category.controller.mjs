@@ -45,15 +45,23 @@ class GlobalCategoryController {
     }
   };
   createUrlImage = async (req, res) => {
-    const { image_url } = req.body;
-
     try {
+      const { name, image_url } = req.body;
       const dataImage = {};
 
       const filename = await downloadFileHttps(image_url);
-      await downloadFileV2(dataImage, filename, "companies");
+      await downloadFileV2(dataImage, filename, "global_category");
 
-      res.send("end");
+      const latinText = transliterate(name.trim());
+
+      const newData = await db.query(
+        `INSERT INTO ${
+          this.#NAME_TABLE
+        } (name, created_at, image, name_en) values ($1, $2, $3, $4) RETURNING *`,
+        [name.trim(), formatDate(new Date()), dataImage.image, latinText]
+      );
+
+      res.json(newData.rows[0]);
     } catch (err) {
       res.json({
         error: {

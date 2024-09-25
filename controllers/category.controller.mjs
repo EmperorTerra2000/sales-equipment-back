@@ -3,7 +3,11 @@ import {
   formatDate,
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
-import { downloadFile } from "../utils/helpers/action.helpers.mjs";
+import {
+  downloadFile,
+  downloadFileHttps,
+  downloadFileV2,
+} from "../utils/helpers/action.helpers.mjs";
 import { URL_HOST } from "../src/app.mjs";
 
 class CategoryController {
@@ -21,6 +25,39 @@ class CategoryController {
       await downloadFile(req, dataImage, "category");
 
       const latinText = transliterate(name.trim());
+      const newData = await db.query(
+        `INSERT INTO ${
+          this.#NAME_TABLE
+        } (name, created_at, image, name_en, global_category_id) values ($1, $2, $3, $4, $5) RETURNING *`,
+        [
+          name.trim(),
+          formatDate(new Date()),
+          dataImage.image,
+          latinText,
+          globalCatId,
+        ]
+      );
+
+      res.json(newData.rows[0]);
+    } catch (err) {
+      res.json({
+        error: {
+          message: err.message,
+        },
+      });
+      console.error(err);
+    }
+  };
+  createUrlImage = async (req, res) => {
+    try {
+      const { name, image_url, globalCatId } = req.body;
+      const dataImage = {};
+
+      const filename = await downloadFileHttps(image_url);
+      await downloadFileV2(dataImage, filename, "category");
+
+      const latinText = transliterate(name.trim());
+
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
@@ -103,7 +140,9 @@ class CategoryController {
     try {
       const id = req.params.id;
       const data = await db.query(
-        `SELECT * FROM ${this.#NAME_TABLE} where global_category_id = $1`,
+        `SELECT * FROM ${
+          this.#NAME_TABLE
+        } where global_category_id = $1 AND active = true`,
         [id]
       );
 
