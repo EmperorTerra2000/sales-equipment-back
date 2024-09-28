@@ -190,6 +190,62 @@ class ProductController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+  getList = async (req, res) => {
+    try {
+      const { nameCategory } = req.params;
+
+      if (!nameCategory) {
+        return res.status(400).json({ error: "name is required" });
+      }
+
+      const dataCategory = await db.query(
+        `SELECT * FROM category WHERE name_en = $1`,
+        [nameCategory]
+      );
+
+      // Проверка наличия данных
+      if (dataCategory.rows.length === 0) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+
+      const dataProducts = await db.query(
+        `SELECT * FROM ${this.#NAME_TABLE} where category_id = $1`,
+        [dataCategory.rows[0].id]
+      );
+
+      const dataGlobalCategory = await db.query(
+        "SELECT * FROM global_category where id = $1",
+        [dataCategory.rows[0].global_category_id]
+      );
+
+      // Проверка наличия данных
+      if (dataProducts.rows.length === 0 || dataGlobalCategory.rows.length === 0) {
+        return res.status(404).json({ error: "No categories found" });
+      }
+
+      dataProducts.rows = data.rows.map((item) => ({
+        ...item,
+        image: `${URL_HOST}/uploads/products/${item.image}`,
+      }));
+
+      // Отправка данных в ответе
+      res.json({
+        global_cat: {
+          name: dataGlobalCategory.rows[0].name,
+          name_en: dataGlobalCategory.rows[0].name_en,
+        },
+        products: dataProducts.rows,
+        category: {
+          name: dataCategory.rows[0].name,
+          name_en: dataCategory.rows[0].name_en,
+        }
+      });
+    } catch (error) {
+      // Обработка ошибок
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
   getOne = async (req, res) => {
     const id = req.params.id;
     const category = await db.query(

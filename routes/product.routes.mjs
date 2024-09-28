@@ -20,6 +20,7 @@ const upload = multer({ storage: storage });
 router.post("/product", upload.single("image"), productController.create);
 router.post("/product/url-image", productController.createUrlImage);
 router.get("/product", productController.get);
+router.get("/product-list/:nameCategory", productController.getList);
 router.get("/product/company/:id", productController.getCompanyId);
 router.get("/product/:id", productController.getOne);
 router.get("/product/name_en/:name", productController.getOneName);
