@@ -223,7 +223,7 @@ class ProductController {
         return res.status(404).json({ error: "No categories found" });
       }
 
-      dataProducts.rows = data.rows.map((item) => ({
+      dataProducts.rows = dataProducts.rows.map((item) => ({
         ...item,
         image: `${URL_HOST}/uploads/products/${item.image}`,
       }));
