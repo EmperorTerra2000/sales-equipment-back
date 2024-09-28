@@ -193,6 +193,9 @@ class ProductController {
   getList = async (req, res) => {
     try {
       const { nameCategory } = req.params;
+      let global_cat = null;
+      let products = [];
+      let category = null;
 
       if (!nameCategory) {
         return res.status(400).json({ error: "name is required" });
@@ -205,7 +208,12 @@ class ProductController {
 
       // Проверка наличия данных
       if (dataCategory.rows.length === 0) {
-        return res.status(404).json({ error: "Category not found" });
+        category = null;
+      } else if (dataCategory.rows.length > 0){
+        category = {
+          name: dataCategory.rows[0].name,
+          name_en: dataCategory.rows[0].name_en,
+        };
       }
 
       const dataProducts = await db.query(
@@ -213,32 +221,37 @@ class ProductController {
         [dataCategory.rows[0].id]
       );
 
+      if (dataProducts.rows.length === 0) {
+        products = [];
+      } else if (dataProducts.rows.length > 0) {
+        products = dataProducts.rows.map((item) => ({
+          ...item,
+          image: `${URL_HOST}/uploads/products/${item.image}`,
+        }));
+      } else {
+        products = null;
+      }
+
       const dataGlobalCategory = await db.query(
         "SELECT * FROM global_category where id = $1",
         [dataCategory.rows[0].global_category_id]
       );
 
       // Проверка наличия данных
-      if (dataProducts.rows.length === 0 || dataGlobalCategory.rows.length === 0) {
-        return res.status(404).json({ error: "No categories found" });
+      if (dataGlobalCategory.rows.length === 0) {
+        global_cat = null;
+      } else if (dataGlobalCategory.rows.length > 0) {
+        global_cat = {
+          name: dataGlobalCategory.rows[0].name,
+          name_en: dataGlobalCategory.rows[0].name_en,
+        };
       }
-
-      dataProducts.rows = dataProducts.rows.map((item) => ({
-        ...item,
-        image: `${URL_HOST}/uploads/products/${item.image}`,
-      }));
 
       // Отправка данных в ответе
       res.json({
-        global_cat: {
-          name: dataGlobalCategory.rows[0].name,
-          name_en: dataGlobalCategory.rows[0].name_en,
-        },
-        products: dataProducts.rows,
-        category: {
-          name: dataCategory.rows[0].name,
-          name_en: dataCategory.rows[0].name_en,
-        }
+        global_cat,
+        products,
+        category,
       });
     } catch (error) {
       // Обработка ошибок
