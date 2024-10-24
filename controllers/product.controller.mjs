@@ -60,7 +60,7 @@ class ProductController {
   };
   createUrlImage = async (req, res) => {
     try {
-      const { name, companyId, description, specifications, image_url } =
+      const { name, categoryId, description, specifications, image_url } =
         req.body;
       const dataImage = {};
 
@@ -72,14 +72,14 @@ class ProductController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, description, companies_id, specifications) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        } (name, created_at, image, name_en, description, category_id, specifications) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
         [
           name.trim(),
           formatDate(new Date()),
           filename,
           latinText,
           description,
-          companyId,
+          categoryId,
           !specifications ? null : JSON.stringify(specifications),
         ]
       );
