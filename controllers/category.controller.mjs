@@ -19,7 +19,7 @@ class CategoryController {
     }
 
     try {
-      const { name, globalCatId } = req.body;
+      const { name, globalCatId, description } = req.body;
       const dataImage = {};
 
       await downloadFile(req, dataImage, "category");
@@ -28,13 +28,14 @@ class CategoryController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, global_category_id) values ($1, $2, $3, $4, $5) RETURNING *`,
+        } (name, created_at, image, name_en, global_category_id, description) values ($1, $2, $3, $4, $5, $6) RETURNING *`,
         [
           name.trim(),
           formatDate(new Date()),
           dataImage.image,
           latinText,
           globalCatId,
+          !description ? null : description,
         ]
       );
 
@@ -50,7 +51,7 @@ class CategoryController {
   };
   createUrlImage = async (req, res) => {
     try {
-      const { name, image_url, globalCatId } = req.body;
+      const { name, image_url, globalCatId, description } = req.body;
       const dataImage = {};
 
       const filename = await downloadFileHttps(image_url);
@@ -61,13 +62,14 @@ class CategoryController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, global_category_id) values ($1, $2, $3, $4, $5) RETURNING *`,
+        } (name, created_at, image, name_en, global_category_id, description) values ($1, $2, $3, $4, $5, $6) RETURNING *`,
         [
           name.trim(),
           formatDate(new Date()),
           dataImage.image,
           latinText,
           globalCatId,
+          !description ? null : description,
         ]
       );
 

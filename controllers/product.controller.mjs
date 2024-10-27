@@ -211,6 +211,7 @@ class ProductController {
         category = null;
       } else if (dataCategory.rows.length > 0){
         category = {
+          description: dataCategory.rows[0].description,
           name: dataCategory.rows[0].name,
           name_en: dataCategory.rows[0].name_en,
         };
