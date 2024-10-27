@@ -211,6 +211,7 @@ class ProductController {
         category = null;
       } else if (dataCategory.rows.length > 0){
         category = {
+          image: `${URL_HOST}/uploads/category/${dataCategory.rows[0].image}`,
           description: dataCategory.rows[0].description,
           name: dataCategory.rows[0].name,
           name_en: dataCategory.rows[0].name_en,
