@@ -22,6 +22,7 @@ router.get("/category", categoryController.get);
 router.get("/category/:id", categoryController.getOne);
 router.get("/category/name_en/:name", categoryController.getOneName);
 router.get("/category/global-id/:id", categoryController.getGlobalId);
+router.get("/category/list/:nameGlobalCategory", categoryController.getList);
 router.put(
   "/category",
   celebrate({

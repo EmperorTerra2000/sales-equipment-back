@@ -234,6 +234,85 @@ class CategoryController {
       return res.status(500).json(error.message);
     }
   };
+  getList = async (req, res) => {
+    try {
+      const { nameGlobalCategory } = req.params;
+      const queryObj = req.query;
+
+      let global_cat = null;
+      let category = [];
+
+      if (!nameGlobalCategory) {
+        return res.status(400).json({ error: "name is required" });
+      }
+
+      const dataGlobalCategory = await db.query(
+        `SELECT * FROM global_category WHERE name_en = $1`,
+        [nameGlobalCategory]
+      );
+
+      // Проверка наличия данных
+      if (dataGlobalCategory.rows.length === 0) {
+        global_cat = null;
+      } else if (dataGlobalCategory.rows.length > 0) {
+        global_cat = {
+          image: `${URL_HOST}/uploads/global_category/${dataGlobalCategory.rows[0].image}`,
+          name: dataGlobalCategory.rows[0].name,
+          name_en: dataGlobalCategory.rows[0].name_en,
+        };
+      }
+
+      const getDataCategory = async () => {
+        if (queryObj.company_id) {
+          const company = await db.query(
+            `SELECT * FROM companies where id = $1`,
+            [queryObj.company_id]
+          );
+
+          if (company.rows.length === 0) {
+            return { rows: [] };
+          }
+
+          return db.query(
+            `SELECT * FROM ${
+              this.#NAME_TABLE
+            } where global_category_id = $1 AND active = true AND id = ANY($2::int[])`,
+            [dataGlobalCategory.rows[0].id, company.rows[0].categories]
+          );
+        }
+
+        return db.query(
+          `SELECT * FROM ${
+            this.#NAME_TABLE
+          } where global_category_id = $1 AND active = true`,
+          [dataGlobalCategory.rows[0].id]
+        );
+      };
+
+      const dataCategory = await getDataCategory();
+
+      if (dataCategory.rows.length === 0) {
+        category = [];
+      } else if (dataCategory.rows.length > 0) {
+        category = dataCategory.rows.map((item) => ({
+          ...item,
+          image: `${URL_HOST}/uploads/category/${item.image}`,
+        }));
+      } else {
+        category = null;
+      }
+
+      // Отправка данных в ответе
+      res.json({
+        global_cat,
+        category,
+      });
+    } catch (error) {
+      // Обработка ошибок
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
 }
 
 export default new CategoryController();
