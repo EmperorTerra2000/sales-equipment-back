@@ -154,6 +154,32 @@ class CompanyController {
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+  getGlobalCategoryId = async (req, res) => {
+    try {
+      const id = req.params.id;
+      const data = await db.query(
+        `SELECT * FROM ${this.#NAME_TABLE} where $1 = ANY(global_categories)`,
+        [id]
+      );
+
+      // Проверка наличия данных
+      if (data.rows.length === 0) {
+        return res.status(404).json({ error: "No categories found" });
+      }
+
+      data.rows = data.rows.map((item) => ({
+        ...item,
+        image: `${URL_HOST}/uploads/companies/${item.image}`,
+      }));
+
+      // Отправка данных в ответе
+      res.json(data.rows);
+    } catch (error) {
+      // Обработка ошибок
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  };
   getOne = async (req, res) => {
     const id = req.params.id;
     const category = await db.query(

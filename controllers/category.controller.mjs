@@ -256,6 +256,7 @@ class CategoryController {
         global_cat = null;
       } else if (dataGlobalCategory.rows.length > 0) {
         global_cat = {
+          ...dataGlobalCategory.rows[0],
           image: `${URL_HOST}/uploads/global_category/${dataGlobalCategory.rows[0].image}`,
           name: dataGlobalCategory.rows[0].name,
           name_en: dataGlobalCategory.rows[0].name_en,
