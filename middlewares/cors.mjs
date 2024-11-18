@@ -4,6 +4,7 @@ const allowedCors = [
   "http://movies.praktikum.nomoredomains.work",
   "http://127.0.0.1:3000",
   "http://localhost:3000",
+  "https://idlepshokoff.com",
 ];
 
 const cors = (req, res, next) => {
