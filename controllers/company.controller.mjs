@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { URL_HOST } from "../src/app.mjs";
 import {
   deleteFile,
+  downloadFile,
   downloadFileHttps,
   downloadFileV2,
 } from "../utils/helpers/action.helpers.mjs";
@@ -26,7 +27,7 @@ class CompanyController {
     }
 
     try {
-      const { name, categories } = req.body;
+      const { name, categories, global_categories, description } = req.body;
       const { path: tempPath, originalname, filename } = req.file;
 
       const targetPath = path.join(__rootPath, `uploads/companies/${filename}`);
@@ -36,8 +37,16 @@ class CompanyController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, categories) values ($1, $2, $3, $4, $5) RETURNING *`,
-        [name.trim(), formatDate(new Date()), filename, latinText, categories]
+        } (name, created_at, image, name_en, categories, global_categories, description) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [
+          name.trim(),
+          formatDate(new Date()),
+          filename,
+          latinText,
+          categories,
+          global_categories,
+          description,
+        ]
       );
 
       res.json(newData.rows[0]);
@@ -52,7 +61,8 @@ class CompanyController {
   };
   createUrlImage = async (req, res) => {
     try {
-      const { name, image_url, categories } = req.body;
+      const { name, image_url, categories, global_categories, description } =
+        req.body;
       const dataImage = {};
 
       const filename = await downloadFileHttps(image_url);
@@ -63,8 +73,16 @@ class CompanyController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, categories) values ($1, $2, $3, $4, $5) RETURNING *`,
-        [name.trim(), formatDate(new Date()), filename, latinText, categories]
+        } (name, created_at, image, name_en, categories, global_categories, description) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [
+          name.trim(),
+          formatDate(new Date()),
+          filename,
+          latinText,
+          categories,
+          global_categories,
+          description,
+        ]
       );
 
       res.json(newData.rows[0]);
@@ -190,15 +208,34 @@ class CompanyController {
     res.json(category.rows[0]);
   };
   update = async (req, res) => {
-    const { name, code, id } = req.body;
-    const category = await db.query(
-      `UPDATE ${
-        this.#NAME_TABLE
-      } set name = $1, code = $2 where id = $3 RETURNING *`,
-      [name, code, id]
-    );
+    const { id } = req.params;
+    const updates = req.body;
 
-    res.json(category.rows[0]);
+    if (updates.name) {
+      updates.name_en = transliterate(updates.name.trim());
+    }
+
+    await downloadFile(req, updates, "companies");
+
+    // Создание SQL-запроса для обновления данных
+    const updateQuery = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(", ");
+
+    const values = Object.values(updates);
+    values.push(id);
+
+    const query = `UPDATE ${this.#NAME_TABLE} SET ${updateQuery} WHERE id = $${
+      values.length
+    }`;
+
+    try {
+      const data = await db.query(query, values);
+      res.status(200).send({ message: "Item updated successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ error: "Failed to update item" });
+    }
   };
   delete = async (req, res) => {
     const id = req.params.id;
