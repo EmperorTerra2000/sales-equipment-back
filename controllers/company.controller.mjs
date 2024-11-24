@@ -139,6 +139,11 @@ class CompanyController {
         return res.status(404).json({ error: "Category not found" });
       }
 
+      data.rows = data.rows.map((item) => ({
+        ...item,
+        image: `${URL_HOST}/uploads/companies/${item.image}`,
+      }));
+
       // Отправка данных в ответе
       res.json(data.rows[0]);
     } catch (error) {
