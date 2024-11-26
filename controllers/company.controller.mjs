@@ -120,7 +120,6 @@ class CompanyController {
   };
   getOneName = async (req, res) => {
     try {
-      console.log(req.params);
       const name = req.params.name;
 
       // Проверка наличия параметра
@@ -143,6 +142,34 @@ class CompanyController {
         ...item,
         image: `${URL_HOST}/uploads/companies/${item.image}`,
       }));
+
+      const getGlobalCategories = async (categories) => {
+        for(let i = 0; i < categories.length; i++) {
+          const globalCategories = await db.query(
+            `SELECT * FROM global_category WHERE id = $1`,
+            [categories[i].global_category_id]
+          );
+
+          categories[i].global_category = globalCategories.rows[0];
+        }
+      }
+
+      if (
+        Array.isArray(data.rows[0].categories) &&
+        data.rows[0].categories.length > 0
+      ) {
+        const categories = await db.query(
+          `SELECT * FROM category WHERE id = ANY($1::int[])`,
+          [data.rows[0].categories]
+        );
+
+        await getGlobalCategories(categories.rows);
+
+        data.rows[0].categories = categories.rows.map((item) => ({
+          ...item,
+          image: `${URL_HOST}/uploads/category/${item.image}`,
+        }));
+      }
 
       // Отправка данных в ответе
       res.json(data.rows[0]);
