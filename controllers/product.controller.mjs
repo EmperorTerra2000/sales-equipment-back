@@ -1,21 +1,14 @@
-import sharp from "sharp";
-import * as path from "path";
 import db from "../src/db.mjs";
 import {
   formatDate,
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
-import { fileURLToPath } from "url";
 import { URL_HOST } from "../src/app.mjs";
 import {
-  deleteFile,
+  downloadFile,
   downloadFileHttps,
   downloadFileV2,
 } from "../utils/helpers/action.helpers.mjs";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const __rootPath = path.resolve(__dirname, "..");
 
 class ProductController {
   #NAME_TABLE = "products";
@@ -27,11 +20,10 @@ class ProductController {
 
     try {
       const { name, companyId, description, specifications } = req.body;
-      const { path: tempPath, filename } = req.file;
+      const dataImage = {};
 
-      const targetPath = path.join(__rootPath, `uploads/products/${filename}`);
-      await sharp(tempPath).toFile(targetPath);
-      await deleteFile(tempPath);
+      await downloadFile(req, dataImage, "products");
+
       const latinText = transliterate(name.trim());
       const newData = await db.query(
         `INSERT INTO ${
@@ -40,7 +32,7 @@ class ProductController {
         [
           name.trim(),
           formatDate(new Date()),
-          filename,
+          dataImage.image,
           latinText,
           description,
           companyId,
