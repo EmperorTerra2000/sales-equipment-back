@@ -24,7 +24,7 @@ router.get("/product-list/:nameCategory", productController.getList);
 router.get("/product/company/:id", productController.getCompanyId);
 router.get("/product/:id", productController.getOne);
 router.get("/product/name_en/:name", productController.getOneName);
-router.patch("/product/:id", productController.update);
+router.patch("/product/:id", upload.single("image"), productController.update);
 router.delete("/product/:id", productController.delete);
 router.delete("/product/activity/:id", productController.activity);
 
