@@ -19,7 +19,8 @@ class ProductController {
     }
 
     try {
-      const { name, categoryId, description, specifications, metadata_desc } = req.body;
+      const { name, categoryId, description, specifications, metadata_desc } =
+        req.body;
       const dataImage = {};
 
       await downloadFile(req, dataImage, "products");
@@ -37,7 +38,7 @@ class ProductController {
           description,
           categoryId,
           !specifications ? null : JSON.stringify(specifications),
-          metadata_desc
+          metadata_desc,
         ]
       );
 
@@ -202,7 +203,7 @@ class ProductController {
       // Проверка наличия данных
       if (dataCategory.rows.length === 0) {
         category = null;
-      } else if (dataCategory.rows.length > 0){
+      } else if (dataCategory.rows.length > 0) {
         category = {
           ...dataCategory.rows[0],
           image: `${URL_HOST}/uploads/category/${dataCategory.rows[0].image}`,
@@ -262,15 +263,34 @@ class ProductController {
     res.json(category.rows[0]);
   };
   update = async (req, res) => {
-    const { name, code, id } = req.body;
-    const category = await db.query(
-      `UPDATE ${
-        this.#NAME_TABLE
-      } set name = $1, code = $2 where id = $3 RETURNING *`,
-      [name, code, id]
-    );
+    const { id } = req.params;
+    const updates = req.body;
 
-    res.json(category.rows[0]);
+    if (updates.name) {
+      updates.name_en = transliterate(updates.name.trim());
+    }
+
+    await downloadFile(req, updates, "products");
+
+    // Создание SQL-запроса для обновления данных
+    const updateQuery = Object.keys(updates)
+      .map((key, index) => `${key} = $${index + 1}`)
+      .join(", ");
+
+    const values = Object.values(updates);
+    values.push(id);
+
+    const query = `UPDATE ${this.#NAME_TABLE} SET ${updateQuery} WHERE id = $${
+      values.length
+    }`;
+
+    try {
+      const data = await db.query(query, values);
+      res.status(200).send({ message: "Item updated successfully" });
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ error: "Failed to update item" });
+    }
   };
   delete = async (req, res) => {
     const id = req.params.id;
