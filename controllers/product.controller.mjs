@@ -28,7 +28,7 @@ class ProductController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, description, category_id, specifications, metadata_desc) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        } (name, created_at, image, name_en, description, category_id, specifications, metadata_desc) values ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
         [
           name.trim(),
           formatDate(new Date()),
