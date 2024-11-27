@@ -19,7 +19,7 @@ class ProductController {
     }
 
     try {
-      const { name, categoryId, description, specifications } = req.body;
+      const { name, categoryId, description, specifications, metadata_desc } = req.body;
       const dataImage = {};
 
       await downloadFile(req, dataImage, "products");
@@ -28,7 +28,7 @@ class ProductController {
       const newData = await db.query(
         `INSERT INTO ${
           this.#NAME_TABLE
-        } (name, created_at, image, name_en, description, category_id, specifications) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        } (name, created_at, image, name_en, description, category_id, specifications, metadata_desc) values ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
         [
           name.trim(),
           formatDate(new Date()),
@@ -37,6 +37,7 @@ class ProductController {
           description,
           categoryId,
           !specifications ? null : JSON.stringify(specifications),
+          metadata_desc
         ]
       );
 
