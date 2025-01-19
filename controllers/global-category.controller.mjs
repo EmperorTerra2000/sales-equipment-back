@@ -146,6 +146,11 @@ class GlobalCategoryController {
         return res.status(404).json({ error: "Category not found" });
       }
 
+      data.rows = data.rows.map((item) => ({
+        ...item,
+        image: `${URL_HOST}/uploads/global_category/${item.image}`,
+      }));
+
       // Отправка данных в ответе
       res.json({
         data: data.rows[0],
