@@ -15,6 +15,7 @@ import {
   routerCompany,
   routerProduct,
   routerSendRequest,
+  routerImage,
 } from "../routes/index.mjs";
 
 config();
@@ -63,6 +64,7 @@ app.use("/api/v1/", routerGlobalCategory);
 app.use("/api/v1/", routerCompany);
 app.use("/api/v1/", routerProduct);
 app.use("/api/v1/", routerSendRequest);
+app.use("/api/v1/", routerImage);
 
 app.get("/", (req, res) => {
   res.send("<h1>HOOOOME</h1>");
