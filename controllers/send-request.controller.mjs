@@ -29,7 +29,7 @@ class SendRequestController {
       });
       // отправка самого письма
       await transporter.sendMail({
-        from: `"ENGINEERING INTELLIGENCE TEAM" <info@idlepshokoff.com>`,
+        from: `"ENGINEERING INTELLIGENCE TEAM" <noreply@idlepshokoff.com>`,
         to: LIST_EMAIL,
         subject: "Заказ",
         text: `${req.body}`,
