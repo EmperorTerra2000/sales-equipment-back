@@ -1,13 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
-import { fileURLToPath } from "url";
 import sharp from "sharp";
 import * as https from "https";
 import { getNameAndFormatImage } from "./formatter.helpers.mjs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const __rootPath = path.resolve(__dirname, "../..");
+const __rootPath = process.cwd();
 
 export async function deleteFile(tempPath) {
   if (fs.existsSync(tempPath)) {

@@ -2,7 +2,6 @@
 import { config } from "dotenv";
 import express from "express";
 import bodyParser from "body-parser";
-import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 // import { renderFile } from "ejs";
 import { errors } from "celebrate";
@@ -16,6 +15,7 @@ import {
   routerProduct,
   routerSendRequest,
   routerImage,
+  routerAuth,
 } from "../routes/index.mjs";
 
 config();
@@ -27,8 +27,6 @@ const PORT = NODE_ENV === "production" ? process.env?.PORT ?? 3030 : 3030;
 export const URL_HOST = process.env?.URL_HOST;
 
 const app = express();
-
-const __filename = fileURLToPath(import.meta.url);
 
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приема страниц внутри POST-запроса
@@ -59,6 +57,7 @@ app.use(cors); // обработка кросс-доменных запросо�
 //   // res.send("The sedulous hyena ate the antelope!");
 // });
 
+app.use("/api/v1/", routerAuth);
 app.use("/api/v1/", routerCategory);
 app.use("/api/v1/", routerGlobalCategory);
 app.use("/api/v1/", routerCompany);

@@ -5,7 +5,6 @@ import {
   formatDate,
   transliterate,
 } from "../utils/helpers/formatter.helpers.mjs";
-import { fileURLToPath } from "url";
 import { URL_HOST } from "../src/app.mjs";
 import {
   deleteFile,
@@ -14,9 +13,7 @@ import {
   downloadFileV2,
 } from "../utils/helpers/action.helpers.mjs";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const __rootPath = path.resolve(__dirname, "..");
+const __rootPath = process.cwd();
 
 class CompanyController {
   #NAME_TABLE = "companies";

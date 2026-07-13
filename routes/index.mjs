@@ -4,6 +4,7 @@ import { default as routerCompany } from "./company.routes.mjs";
 import { default as routerProduct } from "./product.routes.mjs";
 import { default as routerSendRequest } from "./send-request.routes.mjs";
 import { default as routerImage } from "./image.routes.mjs";
+import { default as routerAuth } from "./auth.routes.mjs";
 
 export {
   routerCategory,
@@ -12,4 +13,5 @@ export {
   routerProduct,
   routerSendRequest,
   routerImage,
+  routerAuth,
 };
